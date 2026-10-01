@@ -11,6 +11,68 @@
   ];
   var SEARCH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 
+  /* значки шагов подбора по нотам: свои линейные SVG (не юникод-эмодзи — не спорят с тёмной янтарной темой),
+     один и тот же stroke-width/round как у остальных иконок сайта (поиск, WhatsApp, стрелка «Назад»). */
+  function stepIcon(d) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
+  var STEP_ICONS = {
+    gender: stepIcon('<circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c1-3.3 3.6-5 6.5-5s5.5 1.7 6.5 5"/>'),
+    citrus: stepIcon('<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4.8 7.8l14.4 8.4M4.8 16.2l14.4-8.4"/>'),
+    sweet: stepIcon('<path d="M12 3c3 4.2 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 3-6.8 6-11Z"/>'),
+    fruity: stepIcon('<circle cx="12" cy="14" r="6.2"/><path d="M12 7.8V5M9.5 5.2c1-1.6 3-2 4.6-1"/>'),
+    floral: stepIcon('<circle cx="12" cy="7.3" r="2.6"/><circle cx="17" cy="12" r="2.6"/><circle cx="12" cy="16.7" r="2.6"/><circle cx="7" cy="12" r="2.6"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>'),
+    woody: stepIcon('<circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>'),
+    spicy: stepIcon('<path d="M12 20c-4.4 0-8-3.1-8-7.3C4 9.2 6.8 7 10 7c2.6 0 4.6 1.7 4.6 4s-1.8 3.4-3.6 3.4c-1.4 0-2.4-.8-2.4-2 0-1 .8-1.6 1.6-1.6"/>'),
+    oriental: stepIcon('<path d="M12 3.5 18.5 9 16 19H8L5.5 9Z"/><path d="M12 3.5 9.5 9h5L12 3.5ZM8 9h8M9.5 9 8 19M14.5 9l1.5 10"/>'),
+    musk: stepIcon('<path d="M7.5 16a3.8 3.8 0 0 1-.5-7.6 4.6 4.6 0 0 1 8.8-1.6A4 4 0 0 1 16.5 16H7.5Z"/>'),
+    leather: stepIcon('<path d="M9 20c3-1 1-3.5 0-5s-2-4 1-5.5S12 5 10.5 3.2"/>'),
+    fresh: stepIcon('<path d="M3 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'),
+    done: stepIcon('<circle cx="12" cy="12" r="8.2"/><path d="M8.3 12.3l2.6 2.6 5-5.4"/>')
+  };
+
+  /* Подбор по нотам: группы для чипов подбора. Ключ — id для URL/выбора, метка — подпись чипа,
+     stems — с чего может начинаться слово в тексте нот/описания (после norm: ё→е, нижний регистр). */
+  var NOTE_GROUPS = [
+    { id: 'citrus', label: 'Цитрусовые', items: [
+      ['бергамот', 'Бергамот', ['бергамот']], ['лимон', 'Лимон', ['лимон', 'цитрон']], ['апельсин', 'Апельсин', ['апельсин']],
+      ['грейпфрут', 'Грейпфрут', ['грейпфрут']], ['мандарин', 'Мандарин', ['мандарин']]
+    ] },
+    { id: 'sweet', label: 'Сладкие и гурманские', items: [
+      ['ваниль', 'Ваниль', ['ваниль']], ['карамель', 'Карамель', ['карамель']], ['мед', 'Мёд', ['мед']],
+      ['шоколад', 'Шоколад', ['шоколад']], ['пралине', 'Пралине', ['пралине']], ['миндаль', 'Миндаль', ['миндал']], ['тонка', 'Бобы тонка', ['тонка']]
+    ] },
+    { id: 'fruity', label: 'Фруктовые и ягодные', items: [
+      ['персик', 'Персик', ['персик']], ['малина', 'Малина', ['малин']], ['яблоко', 'Яблоко', ['яблок']],
+      ['смородина', 'Чёрная смородина', ['смородин']], ['груша', 'Груша', ['груш']], ['слива', 'Слива', ['слив']], ['ананас', 'Ананас', ['ананас']]
+    ] },
+    { id: 'floral', label: 'Цветочные', items: [
+      ['роза', 'Роза', ['роза']], ['жасмин', 'Жасмин', ['жасмин']], ['магнолия', 'Магнолия', ['магнол']], ['фиалка', 'Фиалка', ['фиалк']],
+      ['ирис', 'Ирис', ['ирис']], ['нероли', 'Нероли', ['нероли']], ['туберoза', 'Тубероза', ['тубероз']]
+    ] },
+    { id: 'woody', label: 'Древесные', items: [
+      ['сандал', 'Сандал', ['сандал']], ['кедр', 'Кедр', ['кедр']], ['ветивер', 'Ветивер', ['ветивер']],
+      ['пачули', 'Пачули', ['пачул']], ['гваяк', 'Гваяк', ['гваяк']], ['мох', 'Дубовый мох', ['мох']]
+    ] },
+    { id: 'spicy', label: 'Пряные', items: [
+      ['корица', 'Корица', ['корица']], ['кардамон', 'Кардамон', ['кардамон']], ['шафран', 'Шафран', ['шафран']],
+      ['перец', 'Перец', ['перец']], ['имбирь', 'Имбирь', ['имбир']], ['мускат', 'Мускатный орех', ['мускатн']]
+    ] },
+    { id: 'oriental', label: 'Восточные и амбровые', items: [
+      ['амбра', 'Амбра', ['амбра', 'ambroxan', 'амброксан']], ['ладан', 'Ладан', ['ладан']], ['уд', 'Уд', ['уда', 'oud']],
+      ['бензоин', 'Бензоин', ['бензоин']], ['лабданум', 'Лабданум', ['лабданум']]
+    ] },
+    { id: 'musk', label: 'Мускусные и пудровые', items: [
+      ['мускус', 'Мускус', ['мускус', 'musk']], ['кашмеран', 'Кашмеран', ['кашмеран']]
+    ] },
+    { id: 'leather', label: 'Кожаные и дымные', items: [
+      ['кожа', 'Кожа', ['кожа', 'кожан']], ['табак', 'Табак', ['табак']], ['дым', 'Дымные ноты', ['дым']], ['смола', 'Смолистые ноты', ['смол']]
+    ] },
+    { id: 'fresh', label: 'Свежие и водяные', items: [
+      ['море', 'Морская вода', ['морск']], ['чай', 'Зелёный чай', ['чай']], ['мята', 'Мята', ['мята']], ['водные', 'Водные ноты', ['водн']]
+    ] }
+  ];
+  var NOTE_BY_ID = {};
+  NOTE_GROUPS.forEach(function (g) { g.items.forEach(function (it) { NOTE_BY_ID[it[0]] = it; }); });
+
   function norm(s) { return String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[’']/g, ''); }
   function notesText(p) {
     var n = p.nt ? [p.nt.t, p.nt.h, p.nt.b].join(' ') : (p.na || '');
@@ -20,10 +82,43 @@
     if (!p._h) p._h = norm([p.b, p.n, p.fam, notesText(p), A.GENDER[p.g] || '', p.t === 'o' ? 'масло' : ''].join(' '));
     return p._h;
   }
+  /* слова из нот + описания + названия для подбора по нотам (не путать с hay — тот ищет ещё и по бренду/семейству) */
+  function noteWords(p) {
+    if (!p._nw) p._nw = norm([notesText(p), p.d, p.n, p.fam].join(' ')).split(/[^a-zа-я]+/).filter(Boolean);
+    return p._nw;
+  }
+  /* какие из выбранных нот реально нашлись у аромата (для бейджей «почему подошло» на карточке) */
+  function matchedNoteIds(p, ids) {
+    if (!ids.length) return [];
+    var words = noteWords(p), out = [];
+    for (var i = 0; i < ids.length; i++) {
+      var stems = (NOTE_BY_ID[ids[i]] || {})[2] || [], hit = false;
+      for (var j = 0; j < stems.length && !hit; j++) {
+        if (words.some(function (w) { return w.indexOf(stems[j]) === 0; })) hit = true;
+      }
+      if (hit) out.push(ids[i]);
+    }
+    return out;
+  }
+  function noteScore(p, ids) { return matchedNoteIds(p, ids).length; }
   function revealCards(scope) {
     $$('.card', scope).forEach(function (c) { c.classList.add('rv'); });
     A.reveal(scope);
   }
+  /* каскадное появление набора элементов через общий .rv/.in (не попадает под общий A.reveal(),
+     т. к. класс .rv навешивается уже здесь, после того как разовый проход A.reveal() по странице отработал). */
+  function staggerIn(els, step, cap) {
+    if (!els.length) return;
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    els.forEach(function (el, i) {
+      el.classList.add('rv');
+      el.style.setProperty('--d', reduced ? '0ms' : Math.min(i * step, cap) + 'ms');
+    });
+    requestAnimationFrame(function () { requestAnimationFrame(function () { els.forEach(function (el) { el.classList.add('in'); }); }); });
+  }
+  /* снять и тут же вернуть класс, чтобы CSS-анимация проигралась заново */
+  function bounce(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function pop(el) { bounce(el, 'pop'); }
 
   window.APPages = {
     /* ---------------- главная ---------------- */
@@ -32,11 +127,75 @@
       $$('[data-count]').forEach(function (el) { el.textContent = n; });
       $$('[data-count-word]').forEach(function (el) { el.textContent = A.plural(n, ['аромат', 'аромата', 'ароматов']); });
 
-      var hv = $('#heroVial');
-      if (hv) {
-        hv.innerHTML = A.vial({ level: 0.02 });
-        var svg = hv.firstChild;
-        setTimeout(function () { A.setLevel(svg, 1); }, 500);
+      /* карточки первого экрана: бренд и название — из каталога (правки в админке подхватятся сами) */
+      $$('.hcard[data-id]').forEach(function (c) {
+        var p = A.byId[c.getAttribute('data-id')];
+        if (!p) { var more = $('.hcard__more', c); if (more) more.remove(); return; }
+        var fb = $('[data-f="b"]', c), fn = $('[data-f="n"]', c);
+        if (fb && p.b) fb.textContent = p.b;
+        if (fn && p.n) fn.textContent = p.n;
+      });
+
+      /* первый экран: сцена закреплена, пока прокручивается высокий .hero. Доля прокрутки p плавно догоняет цель
+         (как покадровый скраб видео). Флаконы стоят столбиком: pos — какой сейчас в центре (дробное число).
+         В шаге i флакон i открывает крышку, держится, затем уезжает вверх, а i+1 подъезжает снизу. */
+      var heroEl = $('.hero');
+      var reducedMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (heroEl && !reducedMotion) {
+        var hs = heroEl.style, hcards = $$('.hcard', heroEl), bots = $$('.hbot', heroEl);
+        var ranges = hcards.map(function (c) { return [parseFloat(c.getAttribute('data-from')), parseFloat(c.getAttribute('data-to'))]; });
+        var lastStep = ranges.length - 1;
+        var target = 0, cur = -1, running = false, activeIdx = -2;
+        var clamp01 = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
+        var seg = function (p, a, b) { var t = clamp01((p - a) / (b - a)); return t * t * (3 - 2 * t); };
+        var placeBottles = function (pos, idx, l) {
+          bots.forEach(function (b, j) {
+            var d = j - pos, side = j % 2 ? 1 : -1, x, y, r, s, a;
+            if (d >= 0) {
+              var dd = Math.min(d, 1);
+              x = side * dd * 8; y = d * 46; r = side * dd * 9; s = 1 - Math.min(d, 3) * .07; a = clamp01(1 - (d - 2.6) * 2);
+            } else {
+              x = -d * 10; y = d * 150; r = -d * 14; s = 1 + d * .3; a = clamp01(1 + d * 1.8);
+            }
+            b.style.transform = 'translate(-50%, -50%) translate(' + x.toFixed(2) + '%, ' + y.toFixed(2) + '%) rotate(' + r.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
+            b.style.opacity = a.toFixed(3);
+            b.style.setProperty('--k', (j < idx ? 1 : j === idx ? seg(l, .04, .42) : 0).toFixed(4));
+            b.style.setProperty('--m', (j < idx ? 1 : j === idx ? seg(l, .3, .75) : 0).toFixed(4));
+          });
+        };
+        var apply = function (p) {
+          hs.setProperty('--p', p.toFixed(4));
+          var idx = -1, local = 0;
+          for (var i = 0; i < ranges.length; i++) {
+            if (p >= ranges[i][0] && p < ranges[i][1]) { idx = i; local = (p - ranges[i][0]) / (ranges[i][1] - ranges[i][0]); break; }
+          }
+          local = clamp01(local);
+          var pos = idx < 0 ? -.3 + .3 * seg(p, 0, ranges[0][0]) : idx + (idx < lastStep ? seg(local, .7, 1) : 0);
+          placeBottles(pos, idx, local);
+          hs.setProperty('--l', local.toFixed(4));
+          if (idx === activeIdx) return;
+          activeIdx = idx;
+          hcards.forEach(function (c, j) { c.classList.toggle('is-active', j === idx); c.classList.toggle('is-prev', idx > -1 && j < idx); });
+          heroEl.classList.toggle('is-started', idx > -1);
+          hs.setProperty('--hc', idx > -1 ? hcards[idx].getAttribute('data-c') : 'var(--amber)');
+        };
+        var lastT = 0;
+        var tick = function (now) {
+          var dt = lastT ? Math.min(now - lastT, 100) : 16.7, d = target - cur;
+          lastT = now;
+          cur = Math.abs(d) < .0004 ? target : cur + d * (1 - Math.pow(.8, dt / 16.7));
+          apply(cur);
+          if (cur !== target) requestAnimationFrame(tick); else { running = false; lastT = 0; }
+        };
+        var measure = function () {
+          var total = heroEl.offsetHeight - innerHeight;
+          target = clamp01(-heroEl.getBoundingClientRect().top / Math.max(1, total));
+          if (cur < 0) cur = target;
+          if (!running) { running = true; requestAnimationFrame(tick); }
+        };
+        measure();
+        addEventListener('scroll', measure, { passive: true });
+        addEventListener('resize', measure);
       }
 
       var bl = A.CAT.filter(function (p) { return p.bl; });
@@ -157,6 +316,168 @@
       paint(true);
     },
 
+    /* ---------------- подбор по нотам ---------------- */
+    podbor: function () {
+      var PAGE = 24;
+      var qs = new URLSearchParams(location.search);
+      var st = { g: qs.get('g') || '', n: PAGE };
+      var sel = {};
+      (qs.get('notes') || '').split(',').forEach(function (id) { if (NOTE_BY_ID[id]) sel[id] = true; });
+
+      var panel = $('#pdPanel'), grid = $('#pdGrid'), more = $('#pdMore'), res = $('#pdCount');
+      if (!panel) return;
+
+      var GENDERS = [['', 'Всё равно'], ['m', 'Мужской'], ['w', 'Женский'], ['u', 'Унисекс']];
+      /* шаги подбора: сначала «Кому», затем каждая группа нот по очереди — виден только текущий шаг */
+      var STEPS = [{ kind: 'gender' }].concat(NOTE_GROUPS.map(function (g) { return { kind: 'notes', grp: g }; }));
+      var step = 0;
+      var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
+
+      panel.innerHTML =
+        '<div class="stepper">' +
+          '<div class="stepper__top">' +
+            '<button type="button" class="stepper__nav" id="pdBack" aria-label="Назад">' + BACK_ICON + '</button>' +
+            '<div class="stepper__bar" role="progressbar" aria-label="Прогресс подбора" aria-valuemin="0" aria-valuemax="' + STEPS.length + '"><span id="pdBarFill"></span></div>' +
+            '<button type="button" class="stepper__skip" id="pdSkip">Пропустить</button>' +
+          '</div>' +
+          '<div class="stepper__body" id="pdStepBody" aria-live="polite"></div>' +
+          '<div class="finder__foot"><p class="finder__count" id="pdSel"></p><button type="button" class="btn btn--ghost btn--sm" id="pdReset">Начать заново</button></div>' +
+        '</div>';
+      var body = $('#pdStepBody', panel), barFill = $('#pdBarFill', panel), bar = $('.stepper__bar', panel),
+        backBtn = $('#pdBack', panel), skipBtn = $('#pdSkip', panel);
+
+      function stepHTML(s) {
+        if (!s) {
+          return '<div class="stepper__head"><span class="stepper__icon">' + STEP_ICONS.done + '</span><div><p class="stepper__count">Готово</p><h3 class="stepper__title">Вот что мы подобрали</h3></div></div>' +
+            '<p class="lead" style="max-width:none">Результаты ниже. Можно вернуться назад и уточнить выбор в любой группе нот.</p>';
+        }
+        var isGender = s.kind === 'gender';
+        var items = isGender ? GENDERS : s.grp.items;
+        var icon = isGender ? STEP_ICONS.gender : STEP_ICONS[s.grp.id];
+        return '<div class="stepper__head"><span class="stepper__icon">' + icon + '</span><div><p class="stepper__count">Шаг ' + (step + 1) + ' из ' + STEPS.length + '</p>' +
+          '<h3 class="stepper__title">' + (isGender ? 'Кому подбираем аромат?' : esc(s.grp.label)) + '</h3></div></div>' +
+          '<div class="chips chips--wrap stepper__chips"' + (isGender ? ' id="pdGender" role="radiogroup" aria-label="Кому подбираем"' : ' data-grp="' + s.grp.id + '"') + '>' +
+          items.map(function (it) {
+            return isGender
+              ? '<button type="button" class="pill" data-g="' + it[0] + '" aria-pressed="' + (st.g === it[0]) + '">' + it[1] + '</button>'
+              : '<button type="button" class="pill" data-n="' + it[0] + '" aria-pressed="' + (!!sel[it[0]]) + '">' + esc(it[1]) + '</button>';
+          }).join('') +
+          '</div>';
+      }
+      /* перерисовать текущий шаг; animate — проиграть переход (уход старого контента и появление нового) */
+      function renderBody(animate, focusHeading) {
+        var atDone = step >= STEPS.length, s = atDone ? null : STEPS[step];
+        barFill.style.width = Math.round(Math.min(step, STEPS.length) / STEPS.length * 100) + '%';
+        bar.setAttribute('aria-valuenow', Math.min(step, STEPS.length));
+        backBtn.disabled = step === 0;
+        skipBtn.style.visibility = (atDone || (s && s.kind === 'gender')) ? 'hidden' : 'visible';
+        function paintBody() {
+          body.innerHTML = stepHTML(s);
+          staggerIn($$('.stepper__icon, .stepper__title, .pill', body), 40, 280);
+          if (focusHeading) {
+            var h = $('.stepper__title', body);
+            if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+          }
+        }
+        if (!animate || reduced) { paintBody(); return; }
+        body.classList.add('step-leave');
+        setTimeout(function () { paintBody(); body.classList.remove('step-leave'); }, 180);
+      }
+      function advance() { step++; renderBody(true, true); }
+
+      function selIds() { return Object.keys(sel); }
+      function genderLabel(g) { var x = GENDERS.filter(function (x) { return x[0] === g; })[0]; return x ? x[1] : ''; }
+      function genderOk(p, g) {
+        if (!g) return true;
+        if (g === 'u') return p.g === 'u';
+        return p.g === g || p.g === 'u' || !p.g;
+      }
+      function compute() {
+        var ids = selIds();
+        var arr = A.CAT.filter(function (p) { return genderOk(p, st.g); }).map(function (p) { return { p: p, s: noteScore(p, ids) }; });
+        if (ids.length) arr = arr.filter(function (x) { return x.s > 0; });
+        arr.sort(function (a, b) {
+          return b.s - a.s
+            || ((a.p.out ? 1 : 0) - (b.p.out ? 1 : 0))
+            || ((st.g && b.p.g === st.g ? 1 : 0) - (st.g && a.p.g === st.g ? 1 : 0))
+            || (a.p.dt < b.p.dt ? 1 : a.p.dt > b.p.dt ? -1 : 0);
+        });
+        return arr.map(function (x) { return x.p; });
+      }
+      function syncURL() {
+        var u = new URLSearchParams();
+        if (st.g) u.set('g', st.g);
+        var ids = selIds(); if (ids.length) u.set('notes', ids.join(','));
+        var s = u.toString();
+        try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '')); } catch (e) { /* file:// и т. п. */ }
+      }
+      function emptyWa() {
+        var ids = selIds(), labels = ids.map(function (id) { return NOTE_BY_ID[id][1]; });
+        var lines = ['Здравствуйте! Подбираю аромат.'];
+        if (st.g) lines.push('Кому: ' + genderLabel(st.g));
+        if (labels.length) lines.push('Любимые ноты: ' + labels.join(', '));
+        return A.waLink(lines.join(' '));
+      }
+      function paint(reveal) {
+        var ids = selIds(), list = compute(), w = A.plural(list.length, ['аромат', 'аромата', 'ароматов']), shown = list.slice(0, st.n);
+        res.textContent = ids.length
+          ? (list.length ? 'Подойдёт по вашим нотам: ' + list.length + ' ' + w : 'Под такое сочетание нот ничего не нашлось')
+          : 'Пока без нот — показаны новинки каталога, ' + list.length + ' ' + w;
+        $('#pdSel').textContent = ids.length ? 'Выбрано нот: ' + ids.length : 'Ноты пока не выбраны';
+        if (!list.length) {
+          grid.innerHTML = '';
+          more.innerHTML = '<div class="empty"><span class="liq-oriental">' + A.vial({ level: .02, labels: false }) + '</span><p>Под такое сочетание пока ничего нет в каталоге. Уберите одну-две ноты или напишите нам — подберём вручную.</p><div class="empty__act"><button type="button" class="btn btn--primary" id="pdReset2">Сбросить ноты</button><a class="btn btn--ghost" target="_blank" rel="noopener" href="' + emptyWa() + '">Спросить в WhatsApp</a></div></div>';
+          return;
+        }
+        grid.innerHTML = shown.map(A.card).join('');
+        if (ids.length) {
+          $$('.card', grid).forEach(function (cardEl) {
+            var hitIds = matchedNoteIds(A.byId[cardEl.getAttribute('data-id')], ids);
+            if (!hitIds.length) return;
+            var row = document.createElement('div');
+            row.className = 'card__notes';
+            row.innerHTML = hitIds.map(function (id) { return '<span class="tag tag--hit">✓ ' + esc(NOTE_BY_ID[id][1]) + '</span>'; }).join('');
+            cardEl.querySelector('.card__meta').insertAdjacentElement('afterend', row);
+          });
+        }
+        more.innerHTML = list.length > shown.length ? '<button type="button" class="btn btn--ghost btn--lg" id="pdMoreBtn">Показать ещё ' + Math.min(PAGE, list.length - shown.length) + '</button><p class="fine">Показано ' + shown.length + ' из ' + list.length + '</p>' : '';
+        if (reveal) revealCards(grid);
+      }
+      function update() { st.n = PAGE; syncURL(); paint(false); bounce(res, 'glow'); }
+      function resetAll() {
+        sel = {}; st.g = ''; step = 0;
+        update();
+        renderBody(true);
+      }
+
+      panel.addEventListener('click', function (e) {
+        var gb = e.target.closest('#pdGender [data-g]');
+        if (gb) { pop(gb); st.g = gb.getAttribute('data-g'); update(); advance(); return; }
+        var nb = e.target.closest('.stepper__chips[data-grp] [data-n]');
+        if (nb) {
+          pop(nb);
+          var id = nb.getAttribute('data-n');
+          if (sel[id]) delete sel[id]; else sel[id] = true;
+          update(); advance(); return;
+        }
+        if (e.target.closest('#pdSkip')) { advance(); return; }
+        if (e.target.closest('#pdBack')) { if (step > 0) { step--; renderBody(true, true); } return; }
+        if (e.target.closest('#pdReset')) resetAll();
+      });
+      more.addEventListener('click', function (e) {
+        if (e.target.closest('#pdMoreBtn')) {
+          var before = grid.children.length; st.n += PAGE; paint(false);
+          $$('.card', grid).slice(before).forEach(function (c) { c.classList.add('rv'); }); A.reveal(grid);
+          var first = grid.children[before]; if (first) { var a = first.querySelector('.card__name a'); if (a) a.focus({ preventScroll: true }); }
+        }
+        if (e.target.closest('#pdReset2')) resetAll();
+      });
+      A.bindCards(grid);
+      renderBody(false);
+      paint(true);
+    },
+
     /* ---------------- страница аромата ---------------- */
     perfume: function () {
       var id = new URLSearchParams(location.search).get('id'), p = A.byId[id], mount = $('#pf');
@@ -231,9 +552,7 @@
         var sec = $('#related'); sec.hidden = false;
         $('#relGrid').innerHTML = rel.map(A.card).join(''); A.bindCards($('#relGrid')); revealCards($('#relGrid'));
       }
-    },
-
-    raspiv: function () { /* страница статичная; атомайзеры подставляет app.js */ }
+    }
   };
 
   /* ноты: пирамида «верх / сердце / база» или одной строкой */
