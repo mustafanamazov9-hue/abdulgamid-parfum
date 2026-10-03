@@ -12,7 +12,7 @@
 <meta property="og:title" content="Abdulgamid Parfum: нишевая парфюмерия и распив в Волгограде">
 <meta property="og:description" content="Оригинальная парфюмерия, распив 3, 5, 10 мл и масла в Волгограде. Каталог ароматов, корзина и заявка в WhatsApp.">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-<script>document.documentElement.className += ' js';</script>
+<script>document.documentElement.className += ' js';try{if(localStorage.getItem('ap-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&display=swap">
@@ -130,19 +130,20 @@
     </div>
   </section>
 
-  <section class="sec sec--paper" id="volumes" aria-labelledby="volTitle">
+  <section class="sec" id="podbor" aria-labelledby="pdTitle">
     <div class="wrap">
       <div class="sec__head">
-        <p class="eyebrow rv">Распив / <b>сколько это</b></p>
-        <h2 class="h2 rv" id="volTitle">3, 5 или 10 мл: <em>на сколько хватит</em></h2>
-        <p class="lead rv">Цифры из поста магазина о распиве. Какой объём выбрать, подскажем в WhatsApp.</p>
+        <p class="eyebrow rv">Подбор</p>
+        <h2 class="h2 rv" id="pdTitle">Найдём аромат <em>по вашим нотам</em></h2>
+        <p class="lead rv">Отметьте, кому подбираем, и ноты, которые вам нравятся. Покажем подходящие ароматы из каталога, можно сразу добавить в корзину.</p>
       </div>
-      <div class="vol-grid">
-        <article class="vol rv"><div class="vol__top"><p class="vol__num">3<small>мл</small></p><div class="vol__vial liq-oriental" data-vial=".3"></div></div><div class="vol__txt"><p class="vol__puffs">≈ 50 пшиков</p><p class="vol__span">Хватит на 15–25 дней при 2–3 распылениях в день</p><p class="vol__note">Идеальный формат, чтобы протестировать аромат в разных образах.</p></div></article>
-        <article class="vol rv"><div class="vol__top"><p class="vol__num">5<small>мл</small></p><div class="vol__vial liq-oriental" data-vial=".5"></div></div><div class="vol__txt"><p class="vol__puffs">≈ 80 пшиков</p><p class="vol__span">Хватит на 2–5 недель при 2–5 распылениях в день</p><p class="vol__note">Отличный объём, чтобы прочувствовать аромат и понять, станет ли он вашим.</p></div></article>
-        <article class="vol rv"><div class="vol__top"><p class="vol__num">10<small>мл</small></p><div class="vol__vial liq-oriental" data-vial="1"></div></div><div class="vol__txt"><p class="vol__puffs">≈ 160 пшиков</p><p class="vol__span">Хватит на 1–1,5 месяца при 3–5 распылениях в день</p><p class="vol__note">Универсальный формат: на повседневку, в отпуск или на деловые дни.</p></div></article>
-        <article class="vol vol--full rv"><div class="vol__top"><p class="vol__num">Флакон</p></div><div class="vol__txt"><p class="vol__puffs">Полный флакон</p><p class="vol__span">Объём и цену подскажем в WhatsApp.</p><p class="vol__note"><a class="link" target="_blank" rel="noopener" href="#" data-wa="Здравствуйте! Хочу узнать про полный флакон.">Спросить в WhatsApp</a></p></div></article>
+      <div class="finder" id="pdPanel" role="group" aria-label="Параметры подбора"></div>
+      <div class="sec__head" style="margin-top:clamp(36px, 5vw, 64px)">
+        <p class="eyebrow" id="pdCount" role="status" aria-live="polite"></p>
+        <h2 class="h2" id="pdResTitle">Похоже, вам подойдёт</h2>
       </div>
+      <div class="grid" id="pdGrid" data-first="6"></div>
+      <div class="more" id="pdMore"></div>
     </div>
   </section>
 

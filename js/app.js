@@ -451,10 +451,35 @@
   }
 
   /* ---------- шапка, появление, подвал ---------- */
+  /* тема: тёмная (по умолчанию) и светлая; выбор помнит localStorage, атрибут data-theme ставит скрипт в <head> */
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/></svg>';
+  function initTheme(hdr) {
+    var root = document.documentElement, meta = $('meta[name="theme-color"]');
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'hdr__theme';
+    var cart = $('.hdr__cart', hdr); if (!cart) return;
+    cart.parentNode.insertBefore(btn, cart);
+    var paint = function () {
+      var light = root.getAttribute('data-theme') === 'light';
+      btn.innerHTML = light ? MOON : SUN;
+      btn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
+      if (meta) meta.setAttribute('content', light ? '#f6f1e8' : '#1a1613');
+    };
+    btn.addEventListener('click', function () {
+      var light = root.getAttribute('data-theme') !== 'light';
+      if (light) root.setAttribute('data-theme', 'light'); else root.removeAttribute('data-theme');
+      try { localStorage.setItem('ap-theme', light ? 'light' : 'dark'); } catch (e) { /* приватный режим */ }
+      paint();
+    });
+    paint();
+  }
+
   function initHeader() {
     var hdr = $('.hdr'); if (!hdr) return;
     var onScroll = function () { hdr.classList.toggle('is-scrolled', window.scrollY > 24); };
     onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+    initTheme(hdr);
     var burger = $('.hdr__burger'), menu = $('.hdr__menu');
     if (burger && menu) {
       burger.addEventListener('click', function () {
@@ -495,7 +520,6 @@
     buildCart();
     initHeader();
     renderCart();
-    $$('[data-vial]').forEach(function (el) { el.innerHTML = vial({ level: parseFloat(el.getAttribute('data-vial')), labels: false }); });
     $$('[data-wa]').forEach(function (a) { a.setAttribute('href', waLink(a.getAttribute('data-wa'))); });
     buildOrder();
     listeners.push(renderCart, function () { if (form) { syncLines(); renderLines(); } });

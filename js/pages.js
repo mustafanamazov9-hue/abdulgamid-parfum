@@ -222,6 +222,8 @@
         }).join('');
         var bm = $('#brandMore'); if (bm) bm.textContent = 'Все ' + brands.length + ' ' + A.plural(brands.length, ['бренд', 'бренда', 'брендов']) + ' в каталоге';
       }
+
+      window.APPages.podbor();
     },
 
     /* ---------------- каталог ---------------- */
@@ -320,7 +322,8 @@
     podbor: function () {
       var PAGE = 24;
       var qs = new URLSearchParams(location.search);
-      var st = { g: qs.get('g') || '', n: PAGE };
+      var firstEl = $('#pdGrid'), FIRST = (firstEl && parseInt(firstEl.getAttribute('data-first'), 10)) || PAGE;
+      var st = { g: qs.get('g') || '', n: FIRST };
       var sel = {};
       (qs.get('notes') || '').split(',').forEach(function (id) { if (NOTE_BY_ID[id]) sel[id] = true; });
 
@@ -444,7 +447,7 @@
         more.innerHTML = list.length > shown.length ? '<button type="button" class="btn btn--ghost btn--lg" id="pdMoreBtn">Показать ещё ' + Math.min(PAGE, list.length - shown.length) + '</button><p class="fine">Показано ' + shown.length + ' из ' + list.length + '</p>' : '';
         if (reveal) revealCards(grid);
       }
-      function update() { st.n = PAGE; syncURL(); paint(false); bounce(res, 'glow'); }
+      function update() { st.n = FIRST; syncURL(); paint(false); bounce(res, 'glow'); }
       function resetAll() {
         sel = {}; st.g = ''; step = 0;
         update();
