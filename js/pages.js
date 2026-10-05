@@ -187,7 +187,14 @@
           apply(cur);
           if (cur !== target) requestAnimationFrame(tick); else { running = false; lastT = 0; }
         };
+        var scene = matchMedia('(min-height: 640px)');
+        var clearScene = function () {
+          hs.removeProperty('--p'); hs.removeProperty('--l'); hs.removeProperty('--hc'); heroEl.classList.remove('is-started'); activeIdx = -2; cur = -1;
+          bots.forEach(function (b) { b.style.transform = ''; b.style.opacity = ''; b.style.removeProperty('--k'); b.style.removeProperty('--m'); });
+          hcards.forEach(function (c) { c.classList.remove('is-active', 'is-prev'); });
+        };
         var measure = function () {
+          if (!scene.matches) { clearScene(); return; }
           var total = heroEl.offsetHeight - innerHeight;
           target = clamp01(-heroEl.getBoundingClientRect().top / Math.max(1, total));
           if (cur < 0) cur = target;
@@ -494,6 +501,10 @@
       var md = $('meta[name="description"]');
       if (md) md.setAttribute('content', name + ': ' + (p.d || A.famText(p) || 'нишевая парфюмерия') + ' Распив 3, 5, 10 мл и флакон, заявка в WhatsApp.');
       var ogt = $('meta[property="og:title"]'); if (ogt) ogt.setAttribute('content', name + ' | Abdulgamid Parfum');
+      var ld = { '@context': 'https://schema.org', '@type': 'Product', name: name, brand: { '@type': 'Brand', name: p.b || 'Abdulgamid Parfum' }, description: p.d || A.famText(p) || 'Нишевая парфюмерия, распив 3, 5, 10 мл и флакон' };
+      var ldImg = A.photo(p); if (ldImg) ld.image = new URL(ldImg, location.href).href;
+      var ldEl = document.createElement('script'); ldEl.type = 'application/ld+json'; ldEl.textContent = JSON.stringify(ld).replace(/</g, '\\u003c');
+      document.head.appendChild(ldEl);
 
       var v = '5', q = 1, img = A.photo(p);
       var media = img ? '<img src="' + img + '" alt="' + esc(name) + '" width="800" height="1000">' : '<div class="card__art ' + A.liqClass(p) + '">' + A.vial({ level: .7, labels: false }) + '</div>';

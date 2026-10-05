@@ -7,7 +7,7 @@
 .adm-note { padding: 12px 16px; border-radius: 14px; border: 1px solid var(--amber); color: var(--ink-2); font-size: 14px; line-height: 1.5; }
 
 /* вход */
-.adm-login { min-height: 100svh; display: grid; place-items: center; padding: 24px var(--gut); background: radial-gradient(60% 50% at 80% 0%, oklch(78% .13 72 / .10), transparent 70%); }
+.adm-login { min-height: 100svh; display: grid; place-items: center; padding: 24px var(--gut); background: radial-gradient(60% 50% at 80% 0%, color-mix(in oklch, var(--amber) 10%, transparent), transparent 70%); }
 .adm-card { width: min(460px, 100%); display: grid; gap: 20px; padding: clamp(24px, 4vw, 40px); border-radius: 26px; background: var(--bg-2); border: 1px solid var(--line-2); }
 
 /* шапка */
@@ -21,7 +21,7 @@
 .adm-info b { color: var(--ink); font-weight: 500; }
 
 /* панель инструментов */
-.adm-tools { position: sticky; top: 8px; z-index: 30; display: grid; gap: 10px; padding: 12px; margin-bottom: 20px; border-radius: 24px; background: oklch(17% .014 60 / .92); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border: 1px solid var(--line); }
+.adm-tools { position: sticky; top: 8px; z-index: 30; display: grid; gap: 10px; padding: 12px; margin-bottom: 20px; border-radius: 24px; background: var(--glass-3); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border: 1px solid var(--line); }
 .adm-tools__row { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
 .adm-all { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
 .adm-all input { width: 20px; height: 20px; accent-color: var(--amber); }
@@ -74,7 +74,7 @@
 .adm-danger:hover { border-color: var(--err); background: oklch(72% .16 28 / .1); }
 
 /* панель сохранения */
-.adm-savebar { position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; padding: 12px var(--gut); background: oklch(15% .012 60 / .95); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid var(--line-2); }
+.adm-savebar { position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; padding: 12px var(--gut); background: oklch(14% .006 265 / .95); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid var(--line-2); }
 .adm-savebar[hidden] { display: none; }
 .adm-savebar__in { max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
 .adm-savebar p { font-size: 15px; color: var(--ink-2); }
@@ -84,7 +84,7 @@
 /* окно аромата */
 .adm-dialog { width: min(860px, calc(100% - 16px)); max-height: calc(100svh - 16px); padding: 0; border: 1px solid var(--line-2); border-radius: 26px; background: var(--bg-2); color: var(--ink); overflow: hidden; }
 .adm-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
-.adm-dialog::backdrop { background: oklch(8% .01 60 / .72); }
+.adm-dialog::backdrop { background: oklch(7% .005 265 / .72); }
 .adm-dialog form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; max-height: calc(100svh - 16px); }
 .adm-dialog__head { display: flex; justify-content: space-between; align-items: center; padding: 18px 18px 14px 28px; border-bottom: 1px solid var(--line); }
 .adm-dialog__head h2 { font: 400 clamp(24px, 3vw, 32px)/1.1 var(--serif); }

@@ -9,6 +9,9 @@
   var byId = {};
   CAT.forEach(function (p) { byId[p.id] = p; });
 
+  /* внутри Telegram Mini App (скрипт подключает js/tg-boot.js); вне Телеграма TG = null и сайт работает как обычно */
+  var TG = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp : null;
+
   var GENDER = { m: 'Мужской', w: 'Женский', u: 'Унисекс' };
   var VOLS = SHOP.volumes || [];
   var VOL_LABEL = {};
@@ -327,8 +330,8 @@
       fld('f-phone', 'Телефон', '<input id="f-phone" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__">') +
       '<fieldset class="lines"><legend>Что заказать</legend><div id="lines"></div><div><button type="button" class="link" id="addLine">+ ещё аромат</button></div></fieldset>' +
       fld('f-comment', 'Комментарий <i>(необязательно)</i>', '<textarea id="f-comment" name="comment" placeholder="Пожелания, вопросы, удобное время"></textarea>') +
-      '<button class="btn btn--primary btn--lg" type="submit">Отправить в WhatsApp</button>' +
-      '<p class="fine">Данные не сохраняются на сайте: они попадают только в ваше сообщение WhatsApp.</p></form>' +
+      '<button class="btn btn--primary btn--lg" type="submit">' + (TG ? 'Отправить заказ' : 'Отправить в WhatsApp') + '</button>' +
+      '<p class="fine">' + (TG ? 'Заказ уйдёт продавцу в Telegram, мы свяжемся с вами по указанному номеру.' : 'Данные не сохраняются на сайте: они попадают только в ваше сообщение WhatsApp.') + '</p></form>' +
       '<div class="order__done" id="orderDone" hidden></div>' +
       '<datalist id="dlPerfumes">' + CAT.map(function (p) { return '<option value="' + esc(fullName(p)) + '">'; }).join('') + '</datalist>';
     form = $('#orderForm'); doneBox = $('#orderDone');
@@ -401,7 +404,9 @@
     return !first;
   }
   function buildMessage() {
-    var out = ['Здравствуйте! Заявка с сайта ' + SHOP.name, 'Имя: ' + $('#f-name').value.trim(), 'Телефон: ' + $('#f-phone').value.trim(), '', 'Заказ:'];
+    var out = [];
+    if (!TG) out.push('Здравствуйте! Заявка с сайта ' + SHOP.name);
+    out.push('Имя: ' + $('#f-name').value.trim(), 'Телефон: ' + $('#f-phone').value.trim(), '', 'Заказ:');
     var n = 0, sum = 0, all = true;
     lines.forEach(function (l) {
       if (!l.name.trim()) return;
@@ -419,10 +424,42 @@
   function onSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
-    lastMsg = buildMessage(); lastUrl = waLink(lastMsg);
+    lastMsg = buildMessage();
+    if (TG) { sendToTelegram(); return; }
+    lastUrl = waLink(lastMsg);
     var w = window.open(lastUrl, '_blank');
     if (w) { try { w.opener = null; } catch (err) { /* не критично */ } } else { location.href = lastUrl; }
     showDone();
+  }
+  /* Mini App: заказ уходит на сервер, тот проверяет подпись Telegram и пересылает его продавцу (netlify/functions/api.mjs, /api/order) */
+  function sendToTelegram() {
+    var btn = $('button[type="submit"]', form), label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Отправляем…';
+    var back = function (msg) { btn.disabled = false; btn.textContent = label; toast(msg); try { TG.HapticFeedback.notificationOccurred('error'); } catch (err) { /* старый клиент */ } };
+    fetch('/api/order', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ initData: TG.initData, message: lastMsg }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) { back(res.j.message || 'Не удалось отправить заказ. Попробуйте ещё раз.'); return; }
+        btn.disabled = false; btn.textContent = label;
+        try { TG.HapticFeedback.notificationOccurred('success'); } catch (err) { /* старый клиент */ }
+        showSent();
+      })
+      .catch(function () { back('Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.'); });
+  }
+  function resetOrder() {
+    clearCart(); lines = []; syncLines(); renderLines(); form.reset();
+    var u = TG && TG.initDataUnsafe && TG.initDataUnsafe.user;
+    if (u && u.first_name) $('#f-name').value = u.first_name;
+  }
+  function showSent() {
+    doneBox.innerHTML =
+      '<h3>Заказ отправлен</h3>' +
+      '<p class="lead">Мы получили его в Telegram и свяжемся с вами по указанному номеру.</p>' +
+      '<pre>' + esc(lastMsg) + '</pre>' +
+      '<div class="order__act"><a class="btn btn--primary" href="catalog.html">Вернуться в каталог</a></div>';
+    resetOrder();
+    form.hidden = true; doneBox.hidden = false;
+    doneBox.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
   function showDone() {
     doneBox.innerHTML =
@@ -439,7 +476,7 @@
   function onDoneClick(e) {
     if (e.target.closest('[data-back]')) { doneBox.hidden = true; form.hidden = false; return; }
     if (e.target.closest('[data-reset]')) {
-      clearCart(); lines = []; syncLines(); renderLines(); form.reset();
+      resetOrder();
       doneBox.hidden = true; form.hidden = false; toast('Корзина и форма очищены'); return;
     }
     if (e.target.closest('[data-copy]')) {
@@ -464,7 +501,8 @@
       var light = root.getAttribute('data-theme') === 'light';
       btn.innerHTML = light ? MOON : SUN;
       btn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
-      if (meta) meta.setAttribute('content', light ? '#f6f1e8' : '#1a1613');
+      if (meta) meta.setAttribute('content', light ? '#f8f6f1' : '#0f1013');
+      tgColors();
     };
     btn.addEventListener('click', function () {
       var light = root.getAttribute('data-theme') !== 'light';
@@ -473,6 +511,36 @@
       paint();
     });
     paint();
+  }
+
+  /* ---------- Telegram Mini App ---------- */
+  /* шапка и фон окна Телеграма в цвет сайта (в обеих темах) */
+  function tgColors() {
+    if (!TG) return;
+    var c = document.documentElement.getAttribute('data-theme') === 'light' ? '#f8f6f1' : '#0f1013';
+    try { TG.setHeaderColor(c); TG.setBackgroundColor(c); } catch (e) { /* версия Bot API до 6.1 */ }
+  }
+  function initTelegram() {
+    if (!TG) return;
+    try { TG.ready(); TG.expand(); } catch (e) { /* не критично */ }
+    /* тема: если посетитель сам не выбирал, берём ту, что в Телеграме */
+    var saved = null; try { saved = localStorage.getItem('ap-theme'); } catch (e) { /* приватный режим */ }
+    if (!saved && TG.colorScheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    tgColors();
+    /* системная кнопка «назад» вместо стрелки браузера: на главной скрыта */
+    try {
+      if (document.body.getAttribute('data-page') !== 'home') {
+        TG.BackButton.show();
+        TG.BackButton.onClick(function () { if (history.length > 1) history.back(); else location.href = 'index.html'; });
+      }
+    } catch (e) { /* версия Bot API до 6.1 */ }
+    /* внешние ссылки (WhatsApp, Instagram) открываются средствами Телеграма, а не внутри окна магазина */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="http"]');
+      if (!a || a.origin === location.origin) return;
+      e.preventDefault();
+      try { TG.openLink(a.href); } catch (err) { window.open(a.href, '_blank'); }
+    });
   }
 
   function initHeader() {
@@ -518,10 +586,13 @@
 
   function init() {
     buildCart();
+    initTelegram();
     initHeader();
     renderCart();
     $$('[data-wa]').forEach(function (a) { a.setAttribute('href', waLink(a.getAttribute('data-wa'))); });
     buildOrder();
+    var tu = TG && TG.initDataUnsafe && TG.initDataUnsafe.user, nm = $('#f-name');
+    if (tu && tu.first_name && nm && !nm.value) nm.value = tu.first_name;
     listeners.push(renderCart, function () { if (form) { syncLines(); renderLines(); } });
     window.addEventListener('storage', function (e) { if (e.key === KEY) { cart = loadCart(); listeners.forEach(function (fn) { fn(); }); } });
     initMark();

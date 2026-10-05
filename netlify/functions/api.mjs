@@ -1,8 +1,10 @@
 /* Abdulgamid Parfum: серверная часть на Netlify Functions (путь /api/*).
    Каталог, правки из админки и загруженные фото хранятся в Netlify Blobs, GitHub для этого не нужен.
-   Единственная настройка: переменная окружения ADMIN_PASSWORD в Netlify.
+   Настройка: переменная окружения ADMIN_PASSWORD (админка) и, для Telegram Mini App,
+   TELEGRAM_BOT_TOKEN (токен от @BotFather) + TELEGRAM_CHAT_ID (куда слать заказы; несколько через запятую).
 
    Публичные маршруты:
+     POST /api/order            заказ из Mini App { initData, message }: подпись Telegram проверяется, заказ уходит в чат продавца
      GET  /api/catalog.js       живой каталог (без скрытых ароматов), подключается на страницах сайта
      GET  /api/catalog          то же самое в JSON
      GET  /api/photo/<ключ>     фото, загруженные из админки
@@ -292,11 +294,77 @@ async function admin(req, context, path, url) {
   return fail(404, "not_found", "Нет такого маршрута");
 }
 
+/* ---------- заказ из Telegram Mini App ---------- */
+const ORDER_GAP_MS = 10_000;
+const INIT_MAX_AGE_SEC = 24 * 3600;
+const hex = (bytes) => [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+async function hmacRaw(keyBytes, msg) {
+  const key = await subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return new Uint8Array(await subtle.sign("HMAC", key, typeof msg === "string" ? enc.encode(msg) : msg));
+}
+/* Проверка подписи initData по правилам Telegram: HMAC-SHA256 от строки «ключ=значение» (по алфавиту, без hash),
+   секрет = HMAC-SHA256("WebAppData", токен бота). Возвращает объект user или null. */
+async function verifyInitData(initData, token) {
+  const params = new URLSearchParams(initData);
+  const hash = params.get("hash");
+  if (!hash) return null;
+  params.delete("hash");
+  const check = [...params.entries()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([k, v]) => `${k}=${v}`).join("\n");
+  const secret = await hmacRaw(enc.encode("WebAppData"), token);
+  if (!same(enc.encode(hex(await hmacRaw(secret, check))), enc.encode(hash))) return null;
+  const age = Date.now() / 1000 - Number(params.get("auth_date"));
+  if (!(age > -60 && age < INIT_MAX_AGE_SEC)) return null;
+  try {
+    const user = JSON.parse(params.get("user") || "");
+    return user && Number.isInteger(user.id) ? user : null;
+  } catch { return null; }
+}
+async function tgCall(token, method, body) {
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    return !!(r.ok && j.ok);
+  } catch { return false; }
+}
+async function order(req, url) {
+  const token = env("TELEGRAM_BOT_TOKEN");
+  const chats = String(env("TELEGRAM_CHAT_ID") || "").split(/[\s,]+/).filter(Boolean);
+  if (!token || !chats.length) return fail(503, "not_configured", "Приём заказов в Telegram пока не настроен. Напишите нам в WhatsApp.");
+  const origin = req.headers.get("origin");
+  if (origin && origin !== url.origin) return fail(403, "csrf", "Запрос отклонён");
+  const body = await readJson(req);
+  const user = await verifyInitData(String(body.initData ?? ""), token);
+  if (!user) return fail(401, "auth", "Не удалось подтвердить Telegram. Закройте магазин и откройте его заново из бота.");
+  const message = String(body.message ?? "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").trim().slice(0, 2500);
+  if (message.length < 5) return fail(400, "empty", "Пустой заказ");
+
+  /* не чаще одного заказа в 10 секунд с одного аккаунта (защита от двойного нажатия и спама) */
+  const rl = getStore({ name: "orders", consistency: "strong" });
+  try {
+    const last = Number(await rl.get(`rl-${user.id}`)) || 0;
+    if (Date.now() - last < ORDER_GAP_MS) return fail(429, "too_fast", "Заказ уже отправляется. Подождите несколько секунд.");
+    await rl.set(`rl-${user.id}`, String(Date.now()));
+  } catch { /* хранилище недоступно: заказ важнее ограничения */ }
+
+  const who = [user.first_name, user.last_name].filter(Boolean).join(" ").replace(/[\u0000-\u001f]/g, " ").slice(0, 64) || "Покупатель";
+  const head = "Новый заказ из Telegram\n\nПокупатель: ";
+  const tail = (user.username ? ` (@${String(user.username).replace(/[^\w]/g, "")})` : "") + `\n\n${message}`;
+  /* ссылка на профиль покупателя без HTML-разметки: сущность text_mention, смещения в UTF-16 как у строк JS */
+  const payload = { text: head + who + tail, entities: [{ type: "text_mention", offset: head.length, length: who.length, user: { id: user.id } }] };
+  let sent = 0;
+  for (const chat of chats) if (await tgCall(token, "sendMessage", { chat_id: chat, ...payload })) sent++;
+  if (!sent) return fail(502, "telegram", "Не удалось передать заказ. Попробуйте ещё раз или напишите нам в WhatsApp.");
+  /* подтверждение покупателю; сработает, если он уже запускал бота, иначе Telegram откажет и это не страшно */
+  await tgCall(token, "sendMessage", { chat_id: user.id, text: "Заказ принят. Мы свяжемся с вами по указанному номеру." });
+  return json({ ok: true });
+}
+
 /* ---------- вход ---------- */
 export default async (req, context) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
   try {
+    if (req.method === "POST" && path === "/api/order") return await order(req, url);
     if (req.method === "GET" && path === "/api/catalog.js") return await publicCatalog(req, true);
     if (req.method === "GET" && path === "/api/catalog") return await publicCatalog(req, false);
     if (req.method === "GET" && path.startsWith("/api/photo/")) return await servePhoto(decodeURIComponent(path.slice("/api/photo/".length)));
