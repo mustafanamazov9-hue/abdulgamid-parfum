@@ -230,6 +230,98 @@
         var bm = $('#brandMore'); if (bm) bm.textContent = 'Все ' + brands.length + ' ' + A.plural(brands.length, ['бренд', 'бренда', 'брендов']) + ' в каталоге';
       }
 
+      /* пирамида нот: слои раскрываются по прокрутке (пример: Althaïr, ноты берутся из каталога) */
+      var pyr = $('#pyramid'), pyrAroma = A.byId['parfums-de-marly-althair'];
+      if (pyr && !(pyrAroma && pyrAroma.nt && pyrAroma.nt.t)) { pyr.hidden = true; pyr = null; }
+      if (pyr) {
+        $('#pyrName').textContent = pyrAroma.n;
+        var pyrRows = [['Верхние ноты', 'Первые минуты', pyrAroma.nt.t], ['Ноты сердца', 'Раскрываются позже', pyrAroma.nt.h], ['Базовые ноты', 'Остаются дольше всего', pyrAroma.nt.b]];
+        $('#pyrTiers').innerHTML = pyrRows.map(function (r) {
+          return '<li class="tier"><span class="tier__k">' + r[0] + '</span><span class="tier__n">' + esc(r[2]) + '</span><span class="tier__t">' + r[1] + '</span></li>';
+        }).join('');
+        var tierEls = $$('.tier', pyr), pinMq = matchMedia('(prefers-reduced-motion: no-preference) and (min-height: 640px)'), pyrTick = false;
+        var pyrUpdate = function () {
+          pyrTick = false;
+          if (!pinMq.matches) {
+            pyr.classList.remove('is-pinned'); pyr.style.removeProperty('--np');
+            tierEls.forEach(function (el) { el.classList.add('is-on'); el.classList.remove('is-cur'); });
+            return;
+          }
+          pyr.classList.add('is-pinned');
+          var p = Math.max(0, Math.min(1, -pyr.getBoundingClientRect().top / Math.max(1, pyr.offsetHeight - innerHeight)));
+          pyr.style.setProperty('--np', p.toFixed(3));
+          var n = p > .66 ? 3 : p > .38 ? 2 : p > .08 ? 1 : 0;
+          tierEls.forEach(function (el, i) { el.classList.toggle('is-on', i < n); el.classList.toggle('is-cur', i === n - 1); });
+        };
+        pyrUpdate();
+        addEventListener('scroll', function () { if (!pyrTick) { pyrTick = true; requestAnimationFrame(pyrUpdate); } }, { passive: true });
+        addEventListener('resize', pyrUpdate);
+      }
+
+      /* калькулятор «сколько хватит»: пшики из поста магазина (3 мл ≈ 50, 5 мл ≈ 80, 10 мл ≈ 160) */
+      var calcForm = $('#calcForm');
+      if (calcForm) {
+        var PUFFS = { '3': 50, '5': 80, '10': 160 };
+        var calcRun = function () {
+          var v = $('input[name="cv"]:checked', calcForm).value, per = parseInt($('#calcPuffs').value, 10);
+          var days = Math.max(1, Math.round(PUFFS[v] / per)), approx;
+          if (days >= 45) approx = 'около ' + (days / 30).toFixed(1).replace('.', ',').replace(',0', '') + ' месяца';
+          else if (days >= 14) approx = 'около ' + Math.round(days / 7) + ' ' + (Math.round(days / 7) === 1 ? 'недели' : 'недель');
+          else approx = '';
+          $('#calcPuffsOut').textContent = per;
+          $('#calcDays').textContent = '≈ ' + days + ' ' + A.plural(days, ['день', 'дня', 'дней']);
+          $('#calcSub').textContent = 'В ' + v + ' мл около ' + PUFFS[v] + ' пшиков' + (approx ? ' (' + approx + ')' : '') + '. Реальный срок зависит от силы нажатия и погоды.';
+        };
+        calcForm.addEventListener('input', calcRun); calcForm.addEventListener('change', calcRun);
+        calcRun();
+      }
+
+      /* галерея заказов: фото открываются в лайтбоксе (dialog) */
+      var shotImgs = $$('.shots .shot img');
+      if (shotImgs.length && window.HTMLDialogElement) {
+        var dlg = document.createElement('dialog'); dlg.className = 'lb'; dlg.setAttribute('aria-label', 'Фото заказа');
+        dlg.innerHTML = '<img class="lb__img" alt=""><div class="lb__bar"><span class="lb__cap"></span><div class="lb__btns"><button type="button" data-d="-1" aria-label="Предыдущее фото">←</button><button type="button" data-d="1" aria-label="Следующее фото">→</button><button type="button" data-x aria-label="Закрыть">×</button></div></div>';
+        document.body.appendChild(dlg);
+        var lbImg = $('.lb__img', dlg), lbCap = $('.lb__cap', dlg), lbCur = 0;
+        var lbShow = function (i) {
+          lbCur = (i + shotImgs.length) % shotImgs.length;
+          lbImg.src = shotImgs[lbCur].src; lbImg.alt = shotImgs[lbCur].alt;
+          lbCap.textContent = 'Заказ клиента, фото ' + (lbCur + 1) + ' из ' + shotImgs.length;
+        };
+        shotImgs.forEach(function (im, i) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'shot__btn';
+          b.setAttribute('aria-label', 'Открыть фото ' + (i + 1) + ' из ' + shotImgs.length);
+          im.parentNode.insertBefore(b, im); b.appendChild(im);
+          b.addEventListener('click', function () { lbShow(i); dlg.showModal(); });
+        });
+        dlg.addEventListener('click', function (e) {
+          if (e.target === dlg || e.target.closest('[data-x]')) { dlg.close(); return; }
+          var d = e.target.closest('[data-d]'); if (d) lbShow(lbCur + parseInt(d.getAttribute('data-d'), 10));
+        });
+        dlg.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') lbShow(lbCur - 1); if (e.key === 'ArrowRight') lbShow(lbCur + 1); });
+      }
+
+      /* отзывы: только реальные, из SHOP.reviews.items; блок скрыт, пока флаг выключен */
+      var revSec = $('#reviews'), revCfg = window.SHOP && window.SHOP.reviews;
+      if (revSec && revCfg && revCfg.enabled && revCfg.items && revCfg.items.length) {
+        revSec.hidden = false;
+        $('#revList').innerHTML = revCfg.items.map(function (r) {
+          return '<figure class="rev rv">' + (r.img ? '<img src="' + esc(r.img) + '" alt="Отзыв клиента" loading="lazy">' : '<blockquote>' + esc(r.text || '') + '</blockquote>') +
+            '<figcaption>' + esc(r.author || 'Клиент') + (r.source ? ' / ' + esc(r.source) : '') + '</figcaption></figure>';
+        }).join('');
+        A.reveal(revSec);
+      }
+
+      /* разметка FAQPage строится из самого списка вопросов, чтобы текст не расходился */
+      var faqItems = $$('#faq details');
+      if (faqItems.length) {
+        var faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqItems.map(function (d) {
+          return { '@type': 'Question', name: $('summary', d).textContent.trim(), acceptedAnswer: { '@type': 'Answer', text: $('p', d).textContent.trim() } };
+        }) };
+        var faqEl = document.createElement('script'); faqEl.type = 'application/ld+json';
+        faqEl.textContent = JSON.stringify(faqLd).replace(/</g, '\\u003c'); document.head.appendChild(faqEl);
+      }
+
       window.APPages.podbor();
     },
 

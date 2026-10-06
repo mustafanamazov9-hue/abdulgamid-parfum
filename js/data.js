@@ -10,6 +10,9 @@ window.SHOP = {
   phoneView: '8 937 099-40-42',
   city: 'Волгоград',
   instagram: 'abdulgamid_gamdullaev',
+  /* Отзывы на главной: поставьте enabled: true и добавьте только реальные отзывы (с согласия клиентов).
+     Элемент: { text: 'Текст отзыва', author: 'Имя', source: 'WhatsApp' } или { img: 'img/reviews/01.jpg', author: 'Имя', source: 'WhatsApp' } */
+  reviews: { enabled: false, items: [] },
   volumes: [
     { key: '3', label: '3 мл', puffs: 50, span: '15–25 дней', level: 0.3 },
     { key: '5', label: '5 мл', puffs: 80, span: '2–5 недель', level: 0.5 },

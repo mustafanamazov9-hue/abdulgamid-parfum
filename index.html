@@ -60,8 +60,8 @@
           <h1 class="h1 rv" id="heroTitle">Нишевая парфюмерия <em>в&nbsp;Волгограде</em></h1>
           <p class="lead rv">Выберите аромат в каталоге, добавьте в корзину и оставьте заявку: имя, телефон, духи и объём. Ответим в WhatsApp.</p>
           <div class="hero__btns rv">
-            <a class="btn btn--primary btn--lg" href="catalog.html">Открыть каталог</a>
-            <a class="btn btn--ghost btn--lg" target="_blank" rel="noopener" href="#" data-wa="Здравствуйте! Хочу заказать духи."><span><span class="hero__wa-long">Написать в </span>WhatsApp</span></a>
+            <a class="btn btn--primary btn--lg" href="#podbor">Подобрать аромат</a>
+            <a class="btn btn--ghost btn--lg" href="catalog.html">Открыть каталог</a>
           </div>
         </div>
 
@@ -131,6 +131,43 @@
     </div>
   </section>
 
+  <section class="sec why" id="why" aria-labelledby="whyTitle">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow rv">Почему распив</p>
+        <h2 class="h2 rv" id="whyTitle">Почему не стоит брать флакон <em>вслепую</em></h2>
+        <p class="lead rv">Нишевый аромат на коже ведёт себя иначе, чем в описании или на бумажной полоске. Поэтому мы советуем начать с небольшого объёма.</p>
+      </div>
+      <ul class="facts">
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">01</span><h3>На коже всё иначе</h3><p>Верхние ноты уходят за минуты, сердце и база проявляются позже и у каждого звучат по-своему. Описание этого не передаст.</p></li>
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">02</span><h3>Полный флакон: серьёзная покупка</h3><p>Если аромат окажется не вашим, останется флакон, который не хочется носить. С распивом риск намного меньше.</p></li>
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">03</span><h3>Начните с 3 мл</h3><p>Около 50 пшиков на 15–25 дней: хватит, чтобы прожить аромат в разные дни и погоду, а потом решить, брать ли больше.</p></li>
+      </ul>
+      <div class="why__cta rv">
+        <a class="btn btn--primary btn--lg" href="#podbor">Подобрать аромат</a>
+        <a class="btn btn--ghost btn--lg" href="#calc">Посчитать, сколько хватит</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="pyr" id="pyramid" aria-labelledby="pyrTitle">
+    <div class="pyr__pin">
+      <div class="wrap pyr__grid">
+        <div class="pyr__copy">
+          <p class="eyebrow">Как раскрывается аромат</p>
+          <h2 class="h2" id="pyrTitle">Верх, сердце, <em>база</em></h2>
+          <p class="lead">На примере <b id="pyrName">Althaïr</b>: аромат раскрывается слоями, и именно поэтому его стоит носить, а не нюхать с флакона.</p>
+          <p class="pyr__hint" aria-hidden="true">Листайте вниз: слои раскрываются по очереди</p>
+        </div>
+        <div class="pyr__stage">
+          <span class="pyr__glow" aria-hidden="true"></span>
+          <img class="pyr__bottle" src="img/hero/pdm-althair.png" alt="Флакон Parfums de Marly Althaïr" width="219" height="454" loading="lazy" decoding="async">
+          <ol class="pyr__tiers" id="pyrTiers"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" id="podbor" aria-labelledby="pdTitle">
     <div class="wrap">
       <div class="sec__head">
@@ -154,6 +191,7 @@
         <div style="display:grid;gap:16px">
           <p class="eyebrow rv">Подборка магазина</p>
           <h2 class="h2 rv" id="blindTitle">Можно брать <em>вслепую</em></h2>
+          <p class="lead rv">Ароматы, которые чаще всего нравятся: универсальные и без неожиданностей. Выберите объём и добавьте в корзину.</p>
         </div>
         <a class="btn btn--ghost rv" href="catalog.html">Весь каталог</a>
       </div>
@@ -168,6 +206,7 @@
         <p class="eyebrow rv">Авторский аромат</p>
         <h2 class="h2 rv" id="sigName">Attar Al-Janna</h2>
         <p class="lead rv">«Райский аромат» в переводе. Первый авторский аромат магазина: один пшик, и просто наслаждаешься ярким ароматом. Шлейф и стойкость в одном флаконе.</p>
+        <!-- TODO: история создания аромата от владельца (см. TODO.md) -->
         <div class="rv" id="sigNotes"></div>
         <div class="hero__cta rv">
           <button type="button" class="btn btn--primary" id="sigAdd">В корзину, 5 мл</button>
@@ -188,11 +227,42 @@
     </div>
   </section>
 
+  <section class="sec calc" id="calc" aria-labelledby="calcTitle">
+    <div class="wrap calc__wrap">
+      <div class="sec__head">
+        <p class="eyebrow rv">Сколько хватит</p>
+        <h2 class="h2 rv" id="calcTitle">Посчитайте <em>свой распив</em></h2>
+        <p class="lead rv">Выберите объём и сколько раз в день вы пользуетесь духами. Расчёт по данным магазина: в 3 мл около 50 пшиков, в 5 мл около 80, в 10 мл около 160.</p>
+      </div>
+      <form class="calc__box rv" id="calcForm" onsubmit="return false">
+        <fieldset class="calc__vols">
+          <legend class="tools__label">Объём</legend>
+          <label class="vopt"><input type="radio" name="cv" value="3"><span>3 мл</span></label>
+          <label class="vopt"><input type="radio" name="cv" value="5" checked><span>5 мл</span></label>
+          <label class="vopt"><input type="radio" name="cv" value="10"><span>10 мл</span></label>
+        </fieldset>
+        <div class="calc__rng">
+          <label for="calcPuffs" class="tools__label">Пшиков в день: <b id="calcPuffsOut">3</b></label>
+          <input type="range" id="calcPuffs" min="1" max="10" step="1" value="3">
+        </div>
+        <div class="calc__res" aria-live="polite">
+          <p class="calc__big" id="calcDays">≈ 27 дней</p>
+          <p class="calc__sub" id="calcSub"></p>
+        </div>
+      </form>
+      <div class="why__cta rv">
+        <a class="btn btn--primary btn--lg" href="catalog.html">Выбрать аромат</a>
+        <a class="btn btn--ghost btn--lg" href="#podbor">Подобрать по нотам</a>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" style="padding-top:0" aria-labelledby="shotsTitle">
     <div class="wrap">
       <div class="sec__head">
         <p class="eyebrow rv">Из историй магазина</p>
         <h2 class="h2 rv" id="shotsTitle">Так выглядит <em>распив</em></h2>
+        <p class="lead rv">Реальные заказы магазина: атомайзеры, которые уходят клиентам. Нажмите на фото, чтобы рассмотреть.</p>
       </div>
       <div class="shots" tabindex="0" role="group" aria-label="Фото заказов, прокрутите вправо">
         <figure class="shot"><img src="img/orders/01.jpg" alt="Заказ клиента, фото 1" loading="lazy" decoding="async" width="750" height="750"></figure>
@@ -212,18 +282,29 @@
     </div>
   </section>
 
-  <section class="sec" style="padding-top:0" aria-label="Помощь с выбором">
-    <div class="wrap help">
-      <div class="help__card rv">
-        <div><p class="eyebrow">Не знаете, с чего начать?</p><h2 class="h2" style="margin-top:12px">Подберём <em>по нотам</em></h2></div>
-        <p>Отметьте, кому подбираем, и любимые ноты — цитрусовые, сладкие, древесные и другие. Покажем подходящие ароматы из каталога.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn--primary" href="podbor.html">Подобрать аромат</a><a class="link" target="_blank" rel="noopener" href="#" data-wa="Здравствуйте! Помогите подобрать аромат.">или напишите в WhatsApp</a></div>
+  <!-- Отзывы: блок включается флагом SHOP.reviews.enabled в js/data.js и выводит только реальные отзывы из SHOP.reviews.items -->
+  <section class="sec" id="reviews" style="padding-top:0" aria-labelledby="revTitle" hidden>
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow rv">Отзывы</p>
+        <h2 class="h2 rv" id="revTitle">Что говорят <em>клиенты</em></h2>
       </div>
-      <div class="help__card rv">
-        <div><p class="eyebrow">Масла</p><h2 class="h2" style="margin-top:12px">Спросите про <em>масла</em></h2></div>
-        <p>В каталоге масла помечены отдельно. Какие объёмы и что есть сейчас, подскажем в WhatsApp.</p>
-        <div><a class="btn btn--ghost" href="catalog.html?o=1">Масла в каталоге</a></div>
+      <div class="revs" id="revList"></div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0" aria-labelledby="trustTitle">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow rv">Доверие</p>
+        <h2 class="h2 rv" id="trustTitle">Оригинальная парфюмерия, <em>честный распив</em></h2>
       </div>
+      <ul class="facts">
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">01</span><h3>Оригиналы</h3><p>Магазин торгует оригинальной парфюмерией: Tom Ford, Creed, Parfums de Marly, Maison Francis Kurkdjian и другими домами.</p></li>
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">02</span><h3>Распив в атомайзерах</h3><p>Аромат отливается в удобный атомайзер 3, 5 или 10 мл. Подробности о закупке и разливе расскажем в WhatsApp, если вам важно.</p></li>
+        <li class="fact rv"><span class="fact__n" aria-hidden="true">03</span><h3>Живой ответ</h3><p>На любой вопрос про аромат, наличие и получение отвечает сам магазин в WhatsApp, без автоответчиков.</p></li>
+      </ul>
+      <!-- TODO: подтверждения подлинности от владельца: поставщики, чеки, партии, фото разлива (см. TODO.md) -->
     </div>
   </section>
 
@@ -234,11 +315,21 @@
         <h2 class="h2 rv" id="stepsTitle">Четыре шага <em>до ответа</em></h2>
       </div>
       <ol class="steps">
-        <li class="step rv"><h3>Выберите аромат</h3><p>Каталог с поиском и фильтрами или подбор по нотам. Ноты и описание есть на странице каждого аромата.</p></li>
-        <li class="step rv"><h3>Добавьте в корзину</h3><p>Выберите объём: 3, 5, 10 мл или флакон. Корзина сохранится, даже если вы закроете сайт.</p></li>
-        <li class="step rv"><h3>Оставьте заявку</h3><p>Имя, телефон, название духов и объём. Ароматы из корзины подставятся в форму сами.</p></li>
-        <li class="step rv"><h3>Ответим в WhatsApp</h3><p>Форма откроет WhatsApp с готовым сообщением. Цену и детали уточним в переписке.</p></li>
+        <li class="step rv"><a class="step__a" href="#podbor"><h3>Выберите аромат</h3><p>Каталог с поиском и фильтрами или подбор по нотам. Ноты и описание есть на странице каждого аромата.</p><span class="step__go">Подобрать</span></a></li>
+        <li class="step rv"><a class="step__a" href="#" data-cart-open><h3>Добавьте в корзину</h3><p>Выберите объём: 3, 5, 10 мл или флакон. Корзина сохранится, даже если вы закроете сайт.</p><span class="step__go">Открыть корзину</span></a></li>
+        <li class="step rv"><a class="step__a" href="#order" data-goto-order><h3>Оставьте заявку</h3><p>Имя, телефон, название духов и объём. Ароматы из корзины подставятся в форму сами.</p><span class="step__go">К заявке</span></a></li>
+        <li class="step rv"><a class="step__a" href="#" target="_blank" rel="noopener" data-wa="Здравствуйте! Хочу заказать духи."><h3>Ответим в WhatsApp</h3><p>Форма откроет WhatsApp с готовым сообщением. Цену и детали уточним в переписке.</p><span class="step__go">Написать</span></a></li>
       </ol>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0" aria-labelledby="oilTitle">
+    <div class="wrap">
+      <div class="help__card oils rv">
+        <div><p class="eyebrow">Масла</p><h2 class="h2" id="oilTitle" style="margin-top:12px">Масла <em>в ассортименте</em></h2></div>
+        <p>Концентрированные ароматические масла отмечены в каталоге отдельно. Какие объёмы и что есть сейчас, подскажем в WhatsApp.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn--ghost" href="catalog.html?o=1">Масла в каталоге</a><a class="link" target="_blank" rel="noopener" href="#" data-wa="Здравствуйте! Хочу узнать про масла.">Спросить в WhatsApp</a></div>
+      </div>
     </div>
   </section>
 
@@ -248,16 +339,33 @@
         <p class="eyebrow rv">Вопросы</p>
         <h2 class="h2 rv" id="faqTitle">Коротко <em>о главном</em></h2>
       </div>
-      <div class="faq rv">
+      <div class="faq rv" id="faq">
         <details><summary>Что такое распив и сколько хватит 3, 5 и 10 мл?</summary><p>Распив: небольшой объём аромата в удобном атомайзере, чтобы попробовать духи, не покупая полный флакон. По данным магазина: 3 мл это около 50 пшиков (15–25 дней при 2–3 распылениях в день), 5 мл около 80 пшиков (2–5 недель), 10 мл около 160 пшиков (1–1,5 месяца).</p></details>
         <details><summary>Как сделать заказ?</summary><p>Выберите аромат в каталоге, добавьте нужный объём в корзину и заполните форму заявки внизу страницы. Она откроет WhatsApp с готовым сообщением, останется нажать «Отправить».</p></details>
         <details><summary>Сколько стоит?</summary><p>Цена зависит от аромата и объёма. На сайте цен пока нет: назовём их в WhatsApp после заявки.</p></details>
         <details><summary>Есть ли масла?</summary><p>Да, масла есть в ассортименте магазина. В каталоге они помечены отметкой «Масло», а объёмы и цену подскажем в WhatsApp.</p></details>
         <details><summary>Это оригинальная парфюмерия?</summary><p>В профиле магазина указано: оригинальная парфюмерия, распив, масла. По конкретному аромату можно уточнить в WhatsApp.</p></details>
         <details><summary>Как получить заказ?</summary><p>Магазин находится в Волгограде. Условия получения и доставки обсудим в WhatsApp.</p></details>
+        <details><summary>Как узнать, есть ли аромат в наличии?</summary><p>Напишите нам в WhatsApp, и мы ответим, есть ли нужный аромат и объём. На странице аромата для этого есть кнопка «Узнать о наличии».</p></details>
+        <details><summary>Как долго хранится распив?</summary><p>Точных сроков хранения мы на сайте не указываем. Храните атомайзер в прохладном месте, без прямого солнца, и спросите нас про конкретный аромат в WhatsApp.</p></details>
+        <details><summary>Можно ли вернуть, если аромат не подошёл?</summary><p>Условия обмена и возврата обсуждаем индивидуально. Напишите в WhatsApp до заказа, и мы объясним, как это работает для распива.</p></details>
       </div>
     </div>
   </section>
+
+  <section class="sec final" id="final" aria-labelledby="finalTitle">
+    <div class="wrap final__wrap">
+      <p class="eyebrow rv">Первый шаг</p>
+      <h2 class="h2 rv" id="finalTitle">Начните <em>с распива</em></h2>
+      <p class="lead rv">Найдите свой аромат без риска: небольшой объём, живой ответ в WhatsApp, всё остальное решите потом.</p>
+      <div class="why__cta rv">
+        <a class="btn btn--primary btn--lg" href="#podbor">Подобрать аромат</a>
+        <a class="btn btn--ghost btn--lg" target="_blank" rel="noopener" href="#" data-wa="Здравствуйте! Хочу начать с распива, помогите выбрать аромат.">Написать в WhatsApp</a>
+      </div>
+      <p class="rv"><a class="link" href="https://www.instagram.com/abdulgamid_gamdullaev/" target="_blank" rel="noopener">Instagram @abdulgamid_gamdullaev</a></p>
+    </div>
+  </section>
+
 </main>
 <section class="order" id="order" aria-labelledby="orderTitle">
   <div class="wrap order__inner">
