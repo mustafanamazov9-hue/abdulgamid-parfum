@@ -589,11 +589,11 @@
         return;
       }
       var name = A.fullName(p);
-      document.title = name + ': распив и заказ | Abdulgamid Parfum';
+      document.title = name + ': духи и заказ | Abdulgamid Parfum';
       var md = $('meta[name="description"]');
-      if (md) md.setAttribute('content', name + ': ' + (p.d || A.famText(p) || 'нишевая парфюмерия') + ' Распив 3, 5, 10 мл и флакон, заявка в WhatsApp.');
+      if (md) md.setAttribute('content', name + ': ' + (p.d || A.famText(p) || 'нишевая парфюмерия') + ' Объёмы 3, 5, 10 мл и флакон, заявка в WhatsApp.');
       var ogt = $('meta[property="og:title"]'); if (ogt) ogt.setAttribute('content', name + ' | Abdulgamid Parfum');
-      var ld = { '@context': 'https://schema.org', '@type': 'Product', name: name, brand: { '@type': 'Brand', name: p.b || 'Abdulgamid Parfum' }, description: p.d || A.famText(p) || 'Нишевая парфюмерия, распив 3, 5, 10 мл и флакон' };
+      var ld = { '@context': 'https://schema.org', '@type': 'Product', name: name, brand: { '@type': 'Brand', name: p.b || 'Abdulgamid Parfum' }, description: p.d || A.famText(p) || 'Нишевая масляная парфюмерия, объёмы 3, 5, 10 мл и флакон' };
       var ldImg = A.photo(p); if (ldImg) ld.image = new URL(ldImg, location.href).href;
       var ldEl = document.createElement('script'); ldEl.type = 'application/ld+json'; ldEl.textContent = JSON.stringify(ld).replace(/</g, '\\u003c');
       document.head.appendChild(ldEl);

@@ -425,7 +425,7 @@ body::after {
 .help__card:hover { transform: translateY(-6px); border-color: var(--line-2); }
 .help__card p { color: var(--ink-2); max-width: 44ch; }
 
-/* ============ Распив: шаги, вопросы ============ */
+/* ============ Шаги заказа, вопросы ============ */
 .page-hero { display: grid; gap: 24px; max-width: 900px; padding-bottom: var(--sec); }
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: st; }
 .step { position: relative; display: grid; gap: 14px; align-content: start; padding: 26px; border-radius: var(--r); border: 1px solid var(--line-2); counter-increment: st; min-height: 240px; }
@@ -675,7 +675,7 @@ body::after {
 .pf__out strong { font: 400 26px/1.15 var(--serif); }
 .pf__out p { color: var(--ink-2); }
 
-/* ============ Этап 1: главная (почему распив, пирамида, калькулятор, лайтбокс, отзывы, доверие, финал) ============ */
+/* ============ Этап 1: главная (почему масляные духи, пирамида, калькулятор, лайтбокс, отзывы, доверие, финал) ============ */
 .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .fact { position: relative; display: grid; gap: 12px; align-content: start; padding: clamp(22px, 2.4vw, 32px); border-radius: var(--r); background: var(--bg-2); border: 1px solid var(--line); transition: transform .5s var(--ease-out), border-color .3s var(--ease); }
 .fact:hover { transform: translateY(-4px); border-color: var(--line-2); }
